@@ -1,10 +1,12 @@
-from flask import Flask, render_template, request, escape
+from flask import Flask, render_template, request, escape, session
 from vsearch import search4letters
+from checker import check_logged_in
 from DBcm import UseDatabase
 
+
 app = Flask(__name__)
-# Физкультпривет
 #Конфигурация веб-приложения
+app.secret_key = 'GrimDark'
 app.config['dbconfig'] = {'host': '127.0.0.1',
                           'user': 'vsearch',
                           'password': '1488',
@@ -45,6 +47,7 @@ def entry_page() -> 'html':
     return render_template('entry.html', the_title='Welcome to the search4letters on the web!')
 
 @app.route('/viewlog')
+@check_logged_in
 def view_the_log() -> 'html':
     # contents = [] Старая версия для записи в лог-файл
     # with open('vsearch.log') as log:
@@ -62,6 +65,15 @@ def view_the_log() -> 'html':
                             the_row_titles=titles,
                             the_data=contents,)
 
+@app.route('/login')
+def do_login() -> str:
+    session['logged_in'] = True
+    return 'You are logged in'
+
+@app.route('/logout')
+def do_logout() -> str:
+    session.pop('logged_in')
+    return ' You Logout!'
 
 if __name__ == '__main__':
     app.run(debug=True)
